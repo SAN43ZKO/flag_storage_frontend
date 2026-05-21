@@ -1,13 +1,14 @@
-FROM golang:1.26-alpine AS builder
+# flag_storage_frontend/Dockerfile
+FROM node:22-alpine AS builder
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
+COPY package.json package-lock.json* ./
+RUN npm ci
 COPY . .
-RUN CGO_ENABLED=0 go build -o /server ./cmd/server
+RUN npm run build
 
-FROM alpine:3.21
-RUN apk --no-cache add ca-certificates tzdata
-COPY --from=builder /server /server
-COPY migrations /migrations
-EXPOSE 8083
-CMD ["/server"]
+FROM nginx:1.27-alpine
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
