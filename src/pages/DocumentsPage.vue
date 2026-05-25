@@ -19,8 +19,17 @@
 
         <div v-else-if="!files || files.length === 0" class="empty-state">
           <div class="empty-icon">
-            <svg class="icon" viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" fill="none">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              width="48"
+              height="48"
+              stroke="currentColor"
+              fill="none"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
               <polyline points="14 2 14 8 20 8" />
               <line x1="16" y1="13" x2="8" y2="13" />
               <line x1="16" y1="17" x2="8" y2="17" />
@@ -66,20 +75,50 @@
                   <button
                     @click="previewFile(file)"
                     :disabled="previewLoading[file.id]"
-                    :title="previewLoading[file.id] ? 'Идёт подготовка...' : 'Предпросмотр'"
+                    :title="
+                      previewLoading[file.id]
+                        ? 'Идёт подготовка...'
+                        : 'Предпросмотр'
+                    "
                   >
-                    <svg v-if="previewLoading[file.id]" class="icon spinner" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round" />
+                    <svg
+                      v-if="previewLoading[file.id]"
+                      class="icon spinner"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                        fill="none"
+                        stroke-dasharray="31.4 31.4"
+                        stroke-linecap="round"
+                      />
                     </svg>
                     <svg v-else class="icon" viewBox="0 0 24 24">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                       <circle cx="12" cy="12" r="3" />
                     </svg>
                   </button>
-                  <button class="danger" @click="deleteFile(file)" title="Удалить">
+                  <button @click="editFile(file)" title="Редактировать">
+                    <svg class="icon" viewBox="0 0 24 24">
+                      <path
+                        d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    class="danger"
+                    @click="deleteFile(file)"
+                    title="Удалить"
+                  >
                     <svg class="icon" viewBox="0 0 24 24">
                       <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <path
+                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                      />
                       <line x1="10" y1="11" x2="10" y2="17" />
                       <line x1="14" y1="11" x2="14" y2="17" />
                     </svg>
@@ -93,7 +132,11 @@
     </div>
 
     <!-- Модальное окно загрузки -->
-    <div v-if="showUploadModal" class="modal-overlay" @click.self="closeUploadModal">
+    <div
+      v-if="showUploadModal"
+      class="modal-overlay"
+      @click.self="closeUploadModal"
+    >
       <div class="modal modal-square">
         <h2>Загрузить документ</h2>
         <form @submit.prevent="handleUpload">
@@ -112,7 +155,12 @@
               hidden
             />
             <div v-if="!selectedFileName" class="drop-content">
-              <svg class="icon icon-large" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+              <svg
+                class="icon icon-large"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                fill="none"
+              >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
@@ -121,11 +169,19 @@
             </div>
             <div v-else class="file-selected">
               <span>{{ selectedFileName }}</span>
-              <button type="button" @click.stop="clearSelectedFile" class="clear-file">&times;</button>
+              <button
+                type="button"
+                @click.stop="clearSelectedFile"
+                class="clear-file"
+              >
+                &times;
+              </button>
             </div>
           </label>
           <div class="modal-actions">
-            <button type="button" @click="closeUploadModal" class="secondary">Отмена</button>
+            <button type="button" @click="closeUploadModal" class="secondary">
+              Отмена
+            </button>
             <button type="submit" :disabled="!selectedFile">Загрузить</button>
           </div>
         </form>
@@ -134,12 +190,23 @@
     </div>
 
     <!-- Модальное окно подтверждения удаления -->
-    <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+    <div
+      v-if="showDeleteModal"
+      class="modal-overlay"
+      @click.self="closeDeleteModal"
+    >
       <div class="modal modal-square">
         <div class="modal-icon">
-          <svg class="icon icon-large" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+          <svg
+            class="icon icon-large"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            fill="none"
+          >
             <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+            />
             <line x1="10" y1="11" x2="10" y2="17" />
             <line x1="14" y1="11" x2="14" y2="17" />
           </svg>
@@ -173,6 +240,14 @@ const selectedFile = ref(null);
 const dragOver = ref(false);
 
 const searchQuery = ref("");
+
+function editFile(file) {
+    const wopiSrc = encodeURIComponent(
+        `/wopi/files/${file.id}`
+    );
+    const editorUrl = `/collabora/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
+    window.open(editorUrl, '_blank');
+}
 
 let debounceTimer;
 watch(searchQuery, (newVal) => {
@@ -222,7 +297,6 @@ async function previewFile(file) {
     previewLoading.value[file.id] = false;
   }
 }
-
 
 function deleteFile(file) {
   deleteTarget.value = file;
@@ -308,7 +382,10 @@ function onDrop(e) {
     selectedFileName.value = "";
     return;
   }
-  const newFile = new File([file], file.name, { type: file.type, lastModified: file.lastModified });
+  const newFile = new File([file], file.name, {
+    type: file.type,
+    lastModified: file.lastModified,
+  });
   selectedFile.value = newFile;
   selectedFileName.value = newFile.name;
   uploadError.value = "";
@@ -437,7 +514,9 @@ col.col-actions {
   padding: 6px;
   color: var(--text-secondary);
   border-radius: 4px;
-  transition: color var(--transition), background var(--transition);
+  transition:
+    color var(--transition),
+    background var(--transition);
 }
 .actions button:hover {
   background: var(--border);
@@ -504,7 +583,9 @@ col.col-actions {
   padding: 20px;
   margin-bottom: 24px;
   cursor: pointer;
-  transition: border-color var(--transition), background var(--transition);
+  transition:
+    border-color var(--transition),
+    background var(--transition);
 }
 .file-drop-area:hover,
 .file-drop-area.dragover {
@@ -556,7 +637,11 @@ button.secondary {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
