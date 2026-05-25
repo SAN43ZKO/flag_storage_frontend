@@ -244,7 +244,7 @@ const searchQuery = ref("");
 function editFile(file) {
   const wopiHost = 'http://localhost'
   const wopiSrc = encodeURIComponent(`${wopiHost}/wopi/files/${file.id}`)
-  const editorUrl = `http://localhost:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
+  const editorUrl = `https://localhost:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
   window.open(editorUrl, "_blank");
 }
 
