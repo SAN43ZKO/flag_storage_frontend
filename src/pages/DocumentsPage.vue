@@ -242,10 +242,10 @@ const dragOver = ref(false);
 const searchQuery = ref("");
 
 function editFile(file) {
-  const wopiHost = 'https://localhost:9980'
-  const wopiSrc = encodeURIComponent(`${wopiHost}/wopi/files/${file.id}`)
-  const editorUrl = `https://localhost:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
-  window.open(editorUrl, "_blank");
+    const base = 'https://localhost:9980'
+    const wopiSrc = encodeURIComponent(`${base}/wopi/files/${file.id}`)
+    const editorUrl = `${base}/browser/dist/cool.html?WOPISrc=${wopiSrc}`
+    window.open(editorUrl, '_blank')
 }
 
 let debounceTimer;
