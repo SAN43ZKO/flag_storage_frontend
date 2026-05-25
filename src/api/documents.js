@@ -51,6 +51,5 @@ export const documentsApi = {
     request(`${BASE}/upload`, { method: "POST", body: formData }),
   download: (id) => request(`${BASE}/${id}/download`),
   preview: (id) => request(`${BASE}/${id}/preview`),
-  getEditorConfig: (id) => request(`${BASE}/${id}/edit`),
   delete: (id) => request(`${BASE}/${id}`, { method: "DELETE" }),
 };

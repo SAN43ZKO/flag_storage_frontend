@@ -76,11 +76,6 @@
                       <circle cx="12" cy="12" r="3" />
                     </svg>
                   </button>
-                  <button @click="editFile(file)" title="Редактировать">
-                    <svg class="icon" viewBox="0 0 24 24">
-                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                    </svg>
-                  </button>
                   <button class="danger" @click="deleteFile(file)" title="Удалить">
                     <svg class="icon" viewBox="0 0 24 24">
                       <polyline points="3 6 5 6 21 6" />
@@ -228,9 +223,6 @@ async function previewFile(file) {
   }
 }
 
-function editFile(file) {
-  window.open(`/editor.html?id=${file.id}`, "_blank");
-}
 
 function deleteFile(file) {
   deleteTarget.value = file;
