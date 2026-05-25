@@ -243,7 +243,7 @@ const searchQuery = ref("");
 
 function editFile(file) {
   const wopiSrc = encodeURIComponent(`/wopi/files/${file.id}`);
-  const editorUrl = `http://192.168.0.46:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
+  const editorUrl = `http://localhost:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
   window.open(editorUrl, "_blank");
 }
 
