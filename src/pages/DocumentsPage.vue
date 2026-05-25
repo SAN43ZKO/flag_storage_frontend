@@ -242,8 +242,9 @@ const dragOver = ref(false);
 const searchQuery = ref("");
 
 function editFile(file) {
-  const wopiSrc = encodeURIComponent(`/wopi/files/${file.id}`);
-  const editorUrl = `/collabora/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
+  const wopiHost = 'http://localhost'
+  const wopiSrc = encodeURIComponent(`${wopiHost}/wopi/files/${file.id}`)
+  const editorUrl = `http://localhost:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}`;
   window.open(editorUrl, "_blank");
 }
 
