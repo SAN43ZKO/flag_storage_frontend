@@ -26,4 +26,11 @@ export const api = {
   update: (id, data) =>
     request(`${BASE}/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   delete: (id) => request(`${BASE}/${id}`, { method: "DELETE" }),
+  uploadImage: (id, formData) =>
+    fetch(`${BASE}/${id}/image`, { method: "POST", body: formData }).then(
+      (res) => {
+        if (!res.ok) throw new Error("Upload failed");
+        return res.json();
+      },
+    ),
 };

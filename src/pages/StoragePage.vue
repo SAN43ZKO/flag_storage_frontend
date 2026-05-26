@@ -1,11 +1,9 @@
 <template>
-  <title>Группа Флаг | Склад</title>
   <div>
     <div class="page-header">
       <h1>Складской учёт</h1>
       <button @click="openCreateModal">+ Добавить товар</button>
     </div>
-
     <div class="search-bar">
       <input
         v-model="searchQuery"
@@ -20,6 +18,7 @@
       @edit="openEditModal"
       @delete="handleDelete"
       @add="openCreateModal"
+      @preview="handlePreview"
     />
 
     <ProductModal
@@ -27,6 +26,13 @@
       :product="editingProduct"
       @close="closeModal"
       @save="handleSave"
+      @preview="handlePreview"
+    />
+
+    <ImagePreviewModal
+      v-if="previewPath"
+      :imagePath="previewPath"
+      @close="previewPath = null"
     />
   </div>
 </template>
@@ -35,6 +41,7 @@
 import { ref, watch, onMounted } from 'vue'
 import ProductTable from '../components/ProductTable.vue'
 import ProductModal from '../components/ProductModal.vue'
+import ImagePreviewModal from '../components/ImagePreviewModal.vue'
 import { api } from '../api.js'
 
 const products = ref([])
@@ -42,6 +49,15 @@ const loading = ref(true)
 const showModal = ref(false)
 const editingProduct = ref(null)
 const searchQuery = ref('')
+const previewPath = ref(null)
+
+let debounceTimer
+watch(searchQuery, (newVal) => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    fetchProducts(newVal)
+  }, 300)
+})
 
 async function fetchProducts(search = '') {
   loading.value = true
@@ -54,15 +70,6 @@ async function fetchProducts(search = '') {
     loading.value = false
   }
 }
-
-// Дебаунс поиска
-let debounceTimer
-watch(searchQuery, (newVal) => {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    fetchProducts(newVal)
-  }, 300)
-})
 
 function openCreateModal() {
   editingProduct.value = null
@@ -101,6 +108,10 @@ async function handleDelete(product) {
   } catch (e) {
     alert('Ошибка удаления: ' + e.message)
   }
+}
+
+function handlePreview(imagePath) {
+  previewPath.value = imagePath
 }
 
 onMounted(() => fetchProducts())
