@@ -5,8 +5,17 @@
 
       <div v-else-if="!products || products.length === 0" class="empty-state">
         <div class="empty-icon">
-          <svg class="icon" viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" fill="none">
-            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            width="48"
+            height="48"
+            stroke="currentColor"
+            fill="none"
+          >
+            <path
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
           </svg>
         </div>
         <p>На складе пока нет товаров</p>
@@ -37,22 +46,46 @@
         <tbody>
           <tr v-for="product in products" :key="product.id">
             <td>{{ product.id }}</td>
-            <td class="cell-name">{{ product.name ?? '—' }}</td>
-            <td>{{ product.sku ?? '—' }}</td>
-            <td>{{ product.category ?? '—' }}</td>
-            <td>{{ product.unit ?? '—' }}</td>
+            <td>
+              <div class="product-image">
+                <img
+                  v-if="product.image_path"
+                  :src="`/products/images/${product.image_path}`"
+                  class="thumbnail"
+                />
+                <div v-else class="no-image">—</div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="(e) => uploadImage(product, e)"
+                  title="Загрузить изображение"
+                />
+              </div>
+            </td>
+            <td class="cell-name">{{ product.name ?? "—" }}</td>
+            <td>{{ product.sku ?? "—" }}</td>
+            <td>{{ product.category ?? "—" }}</td>
+            <td>{{ product.unit ?? "—" }}</td>
             <td>{{ product.quantity }}</td>
             <td class="cell-actions">
               <div class="actions">
                 <button @click="$emit('edit', product)" title="Редактировать">
                   <svg class="icon" viewBox="0 0 24 24">
-                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                    <path
+                      d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                    />
                   </svg>
                 </button>
-                <button class="danger" @click="$emit('delete', product)" title="Удалить">
+                <button
+                  class="danger"
+                  @click="$emit('delete', product)"
+                  title="Удалить"
+                >
                   <svg class="icon" viewBox="0 0 24 24">
                     <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <path
+                      d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                    />
                     <line x1="10" y1="11" x2="10" y2="17" />
                     <line x1="14" y1="11" x2="14" y2="17" />
                   </svg>
@@ -70,9 +103,28 @@
 defineProps({
   products: Array,
   loading: Boolean,
-})
+});
 
-defineEmits(['edit', 'delete', 'add'])
+async function uploadImage(product, event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('image', file)
+
+  try {
+    const resp = await fetch(`/products/${product.id}/image`, { method: 'POST', body: formData })
+    if (!resp.ok) throw new Error('Upload failed')
+    const data = await resp.json()
+    product.image_path = data.image_path
+  } catch (e) {
+    alert('Ошибка загрузки изображения: ' + e.message)
+  } finally {
+    event.target.value = ''
+  }
+}
+
+defineEmits(["edit", "delete", "add"]);
 </script>
 
 <style scoped>
@@ -121,23 +173,38 @@ defineEmits(['edit', 'delete', 'add'])
 table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;  /* фиксированная ширина колонок, как у вас */
+  table-layout: fixed; /* фиксированная ширина колонок, как у вас */
 }
 
 /* Ширины колонок */
-.col-id { width: 60px; }
-.col-name { width: auto; }      /* будет занимать оставшееся пространство */
-.col-sku { width: 110px; }
-.col-category { width: 110px; }
-.col-unit { width: 60px; }
-.col-qty { width: 90px; }
-.col-actions { width: 100px; }
+.col-id {
+  width: 60px;
+}
+.col-name {
+  width: auto;
+} /* будет занимать оставшееся пространство */
+.col-sku {
+  width: 110px;
+}
+.col-category {
+  width: 110px;
+}
+.col-unit {
+  width: 60px;
+}
+.col-qty {
+  width: 90px;
+}
+.col-actions {
+  width: 100px;
+}
 
-th, td {
+th,
+td {
   padding: 12px 16px;
   text-align: left;
   border-bottom: 1px solid var(--border);
-  vertical-align: middle;   /* содержимое выровнено по центру */
+  vertical-align: middle; /* содержимое выровнено по центру */
   /* убрали фиксированную высоту, строка растягивается по содержимому */
 }
 
@@ -149,7 +216,7 @@ th {
 
 td {
   font-size: 14px;
-  word-wrap: break-word;     /* длинные слова переносятся, чтобы не вылезать за границы */
+  word-wrap: break-word; /* длинные слова переносятся, чтобы не вылезать за границы */
   overflow-wrap: break-word;
 }
 
@@ -173,11 +240,13 @@ td {
 .actions button {
   background: transparent;
   border: none;
-  padding: 4px;               /* компактные кнопки */
+  padding: 4px; /* компактные кнопки */
   color: var(--text-secondary);
   border-radius: 4px;
-  line-height: 0;             /* убираем лишнее пространство вокруг иконки */
-  transition: color var(--transition), background var(--transition);
+  line-height: 0; /* убираем лишнее пространство вокруг иконки */
+  transition:
+    color var(--transition),
+    background var(--transition);
 }
 
 .actions button:hover {
@@ -193,5 +262,27 @@ td {
 .icon {
   width: 16px;
   height: 16px;
+}
+
+.product-image {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.no-image {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 </style>
