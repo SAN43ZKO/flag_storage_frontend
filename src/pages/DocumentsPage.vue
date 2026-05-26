@@ -242,9 +242,10 @@ const dragOver = ref(false);
 const searchQuery = ref("");
 
 function editFile(file) {
-    const base = 'https://localhost:9980'
-    const wopiSrc = encodeURIComponent(`${base}/wopi/files/${file.id}`)
-    const editorUrl = `${base}/browser/dist/cool.html?WOPISrc=${wopiSrc}`
+    // WOPISrc по HTTP, доступный внутри Docker-сети
+    const wopiSrc = encodeURIComponent(`http://frontend/wopi/files/${file.id}`)
+    // Редактор открывается по HTTPS
+    const editorUrl = `https://localhost:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}`
     window.open(editorUrl, '_blank')
 }
 
