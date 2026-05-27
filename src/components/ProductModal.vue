@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal">
-      <h2>{{ isEdit ? 'Редактировать товар' : 'Новый товар' }}</h2>
+      <h2>{{ isEdit ? "Редактировать товар" : "Новый товар" }}</h2>
       <form @submit.prevent="handleSubmit">
         <label>
           Название
@@ -22,7 +22,12 @@
         <label>
           Количество
           <div class="quantity-field">
-            <button type="button" class="qty-btn" @click="decrement" :disabled="form.quantity <= 0">
+            <button
+              type="button"
+              class="qty-btn"
+              @click="decrement"
+              :disabled="form.quantity <= 0"
+            >
               <svg class="icon" viewBox="0 0 24 24">
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -48,7 +53,10 @@
         <div v-if="isEdit" class="image-section">
           <label>Изображение</label>
           <div class="image-zone">
-            <div class="preview-wrapper" @click="form.image_path && $emit('preview', form.image_path)">
+            <div
+              class="preview-wrapper"
+              @click="form.image_path && $emit('preview', form.image_path)"
+            >
               <img
                 v-if="form.image_path"
                 :src="`/products/images/${form.image_path}`"
@@ -58,8 +66,13 @@
               <div v-else class="no-image">—</div>
             </div>
             <div class="image-controls">
-              <label class="icon-btn" title="Загрузить">
-                <input type="file" accept="image/*" @change="onImageSelected" hidden />
+              <label class="icon-btn" title="Загрузить" :class="{ disabled: uploading }">
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="onImageSelected"
+                  hidden
+                />
                 <svg class="icon" viewBox="0 0 24 24">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="17 8 12 3 7 8" />
@@ -74,7 +87,9 @@
               >
                 <svg class="icon" viewBox="0 0 24 24">
                   <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  />
                   <line x1="10" y1="11" x2="10" y2="17" />
                   <line x1="14" y1="11" x2="14" y2="17" />
                 </svg>
@@ -85,8 +100,12 @@
         </div>
 
         <div class="modal-actions">
-          <button type="button" @click="$emit('close')" class="secondary">Отмена</button>
-          <button type="submit">{{ isEdit ? 'Сохранить' : 'Создать' }}</button>
+          <button type="button" @click="$emit('close')" class="secondary">
+            Отмена
+          </button>
+          <button type="submit" :disabled="uploading">
+            {{ isEdit ? "Сохранить" : "Создать" }}
+          </button>
         </div>
       </form>
     </div>
@@ -94,80 +113,87 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { api } from '../api.js'
+import { ref, computed } from "vue";
+import { api } from "../api.js";
 
 const props = defineProps({
-  product: { type: Object, default: null }
-})
+  product: { type: Object, default: null },
+});
 
-const emit = defineEmits(['close', 'save', 'preview'])
+const emit = defineEmits(["close", "save", "preview"]);
 
-const isEdit = computed(() => !!props.product?.id)
+const isEdit = computed(() => !!props.product?.id);
 
 const form = ref({
-  name: props.product?.name || '',
-  sku: props.product?.sku || '',
+  name: props.product?.name || "",
+  sku: props.product?.sku || "",
   quantity: props.product?.quantity || 0,
-  category: props.product?.category || '',
-  unit: props.product?.unit || '',
-  image_path: props.product?.image_path || '',
-})
+  category: props.product?.category || "",
+  unit: props.product?.unit || "",
+  image_path: props.product?.image_path || "",
+});
 
-const imageError = ref('')
+const imageError = ref("");
+const uploading = ref(false);
 
 function increment() {
-  form.value.quantity++
+  form.value.quantity++;
 }
 
 function decrement() {
-  if (form.value.quantity > 0) form.value.quantity--
+  if (form.value.quantity > 0) form.value.quantity--;
 }
 
 async function onImageSelected(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-  const formData = new FormData()
-  formData.append('image', file)
+  uploading.value = true;
+  imageError.value = "";
+
+  const formData = new FormData();
+  formData.append("image", file);
 
   try {
     const resp = await fetch(`/products/${props.product.id}/image`, {
-      method: 'POST',
+      method: "POST",
       body: formData,
-    })
-    if (!resp.ok) throw new Error('Upload failed')
-    const data = await resp.json()
-    form.value.image_path = data.image_path
-    imageError.value = ''
+    });
+    if (!resp.ok) throw new Error("Upload failed");
+    const data = await resp.json();
+    form.value.image_path = data.image_path;
   } catch (e) {
-    imageError.value = 'Ошибка загрузки'
+    imageError.value = "Ошибка загрузки";
   } finally {
-    event.target.value = ''
+    uploading.value = false;
+    event.target.value = "";
   }
 }
 
 async function removeImage() {
-  if (!form.value.image_path) return
+  if (!form.value.image_path) return;
   try {
-    await api.update(props.product.id, { ...form.value, image_path: '' })
-    form.value.image_path = ''
-    imageError.value = ''
+    await api.update(props.product.id, { ...form.value, image_path: "" });
+    form.value.image_path = "";
+    imageError.value = "";
   } catch (e) {
-    imageError.value = 'Ошибка удаления'
+    imageError.value = "Ошибка удаления";
   }
 }
 
 function handleSubmit() {
-  emit('save', { ...form.value, quantity: Number(form.value.quantity) })
+  emit("save", { ...form.value, quantity: Number(form.value.quantity) });
 }
 </script>
 
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.6);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -179,7 +205,7 @@ function handleSubmit() {
   border-radius: var(--radius);
   width: 420px;
   max-width: 90vw;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   transition: background var(--transition);
 }
 h2 {
@@ -284,7 +310,9 @@ input:focus {
   color: var(--text-secondary);
   border-radius: 4px;
   cursor: pointer;
-  transition: color var(--transition), background var(--transition);
+  transition:
+    color var(--transition),
+    background var(--transition);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -317,5 +345,9 @@ input:focus {
 }
 button.secondary {
   background: #555;
+}
+.icon-btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 </style>
