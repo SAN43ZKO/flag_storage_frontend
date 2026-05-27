@@ -2,7 +2,7 @@
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal">
       <h2>{{ isEdit ? "Редактировать товар" : "Новый товар" }}</h2>
-      <form @submit.prevent="handleSubmit">
+      <form @submit.prevent="handleSubmit" @keydown.enter.prevent>
         <label>
           Название
           <input v-model="form.name" />
@@ -66,7 +66,11 @@
               <div v-else class="no-image">—</div>
             </div>
             <div class="image-controls">
-              <label class="icon-btn" title="Загрузить" :class="{ disabled: uploading }">
+              <label
+                class="icon-btn"
+                title="Загрузить"
+                :class="{ disabled: uploading }"
+              >
                 <input
                   type="file"
                   accept="image/*"
@@ -120,7 +124,7 @@ const props = defineProps({
   product: { type: Object, default: null },
 });
 
-const emit = defineEmits(["close", "save", "preview"]);
+const emit = defineEmits(["close", "save", "preview", "update:product"]);
 
 const isEdit = computed(() => !!props.product?.id);
 
@@ -162,6 +166,8 @@ async function onImageSelected(event) {
     if (!resp.ok) throw new Error("Upload failed");
     const data = await resp.json();
     form.value.image_path = data.image_path;
+    emit("update:product", { ...props.product, image_path: data.image_path });
+    console.log("Image path updated:", form.value.image_path);
   } catch (e) {
     imageError.value = "Ошибка загрузки";
   } finally {
@@ -182,6 +188,7 @@ async function removeImage() {
 }
 
 function handleSubmit() {
+  console.log('Submitting form:', JSON.stringify(form.value))
   emit("save", { ...form.value, quantity: Number(form.value.quantity) });
 }
 </script>
