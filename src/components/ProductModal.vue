@@ -3,51 +3,42 @@
     <div class="modal">
       <h2>{{ isEdit ? "Редактировать товар" : "Новый товар" }}</h2>
       <form @submit.prevent="handleSubmit" @keydown.enter.prevent>
-        <label>
-          Название
-          <input v-model="form.name" />
-        </label>
-        <label>
-          Артикул
-          <input v-model="form.sku" />
-        </label>
-        <label>
-          Категория
-          <input v-model="form.category" />
-        </label>
-        <label>
-          Ед. изм.
-          <input v-model="form.unit" />
-        </label>
-        <label>
-          Количество
-          <div class="quantity-field">
-            <button
-              type="button"
-              class="qty-btn"
-              @click="decrement"
-              :disabled="form.quantity <= 0"
-            >
-              <svg class="icon" viewBox="0 0 24 24">
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </button>
-            <input
-              v-model.number="form.quantity"
-              type="text"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              required
-              class="qty-input"
-            />
-            <button type="button" class="qty-btn" @click="increment">
-              <svg class="icon" viewBox="0 0 24 24">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </button>
-          </div>
-        </label>
+        <label> Название </label>
+        <input v-model="form.name" />
+        <label> Артикул </label>
+        <input v-model="form.sku" />
+        <label> Категория </label>
+        <input v-model="form.category" />
+        <label> Ед. изм. </label>
+        <input v-model="form.unit" />
+        <label> Количество</label>
+        <div class="quantity-field">
+          <button
+            type="button"
+            class="qty-btn"
+            @click="decrement"
+            :disabled="form.quantity <= 0"
+          >
+            <svg class="icon" viewBox="0 0 24 24">
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <input
+            v-model.number="form.quantity"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            required
+            class="qty-input"
+          />
+          <button type="button" class="qty-btn" @click="increment">
+            <svg class="icon" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        </div>
+        <!-- </label> -->
 
         <!-- Изображение (только при редактировании) -->
         <div v-if="isEdit" class="image-section">
@@ -55,11 +46,11 @@
           <div class="image-zone">
             <div
               class="preview-wrapper"
-              @click="form.image_path && $emit('preview', form.image_path)"
+              @click="imagePath && $emit('preview', imagePath)"
             >
               <img
-                v-if="form.image_path"
-                :src="`/products/images/${form.image_path}`"
+                v-if="imagePath"
+                :src="`/products/images/${imagePath}`"
                 class="preview-img"
                 alt=""
               />
@@ -68,14 +59,15 @@
             <div class="image-controls">
               <label
                 class="icon-btn"
+                :class="{ disabled: uploading || saving }"
                 title="Загрузить"
-                :class="{ disabled: uploading }"
               >
                 <input
                   type="file"
                   accept="image/*"
                   @change="onImageSelected"
                   hidden
+                  :disabled="uploading || saving"
                 />
                 <svg class="icon" viewBox="0 0 24 24">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -84,10 +76,11 @@
                 </svg>
               </label>
               <button
+                v-if="imagePath"
                 class="icon-btn danger"
                 title="Удалить"
                 @click="removeImage"
-                :disabled="!form.image_path"
+                :disabled="uploading || saving"
               >
                 <svg class="icon" viewBox="0 0 24 24">
                   <polyline points="3 6 5 6 21 6" />
@@ -107,7 +100,7 @@
           <button type="button" @click="$emit('close')" class="secondary">
             Отмена
           </button>
-          <button type="submit" :disabled="uploading">
+          <button type="submit" :disabled="uploading || saving">
             {{ isEdit ? "Сохранить" : "Создать" }}
           </button>
         </div>
@@ -117,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { api } from "../api.js";
 
 const props = defineProps({
@@ -128,17 +121,30 @@ const emit = defineEmits(["close", "save", "preview", "update:product"]);
 
 const isEdit = computed(() => !!props.product?.id);
 
+// Локальное состояние изображения, независимое от props.product.image_path
+const imagePath = ref(props.product?.image_path || "");
+
 const form = ref({
   name: props.product?.name || "",
   sku: props.product?.sku || "",
   quantity: props.product?.quantity || 0,
   category: props.product?.category || "",
   unit: props.product?.unit || "",
-  image_path: props.product?.image_path || "",
 });
 
 const imageError = ref("");
 const uploading = ref(false);
+const saving = ref(false);
+
+// При изменении пропса (например, после обновления родителем) актуализируем imagePath
+watch(
+  () => props.product?.image_path,
+  (newVal) => {
+    if (newVal && !imagePath.value) {
+      imagePath.value = newVal;
+    }
+  },
+);
 
 function increment() {
   form.value.quantity++;
@@ -149,6 +155,7 @@ function decrement() {
 }
 
 async function onImageSelected(event) {
+  if (uploading.value || saving.value) return;
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -165,9 +172,8 @@ async function onImageSelected(event) {
     });
     if (!resp.ok) throw new Error("Upload failed");
     const data = await resp.json();
-    form.value.image_path = data.image_path;
+    imagePath.value = data.image_path;
     emit("update:product", { ...props.product, image_path: data.image_path });
-    console.log("Image path updated:", form.value.image_path);
   } catch (e) {
     imageError.value = "Ошибка загрузки";
   } finally {
@@ -177,19 +183,42 @@ async function onImageSelected(event) {
 }
 
 async function removeImage() {
-  if (!form.value.image_path) return;
+  if (!imagePath.value) return;
+  if (uploading.value || saving.value) return;
+  saving.value = true;
   try {
-    await api.update(props.product.id, { ...form.value, image_path: "" });
-    form.value.image_path = "";
+    await api.update(props.product.id, {
+      name: form.value.name,
+      sku: form.value.sku,
+      quantity: Number(form.value.quantity),
+      category: form.value.category,
+      unit: form.value.unit,
+      image_path: "",
+    });
+    imagePath.value = "";
+    emit("update:product", { ...props.product, image_path: "" });
     imageError.value = "";
   } catch (e) {
     imageError.value = "Ошибка удаления";
+  } finally {
+    saving.value = false;
   }
 }
 
 function handleSubmit() {
-  console.log('Submitting form:', JSON.stringify(form.value))
-  emit("save", { ...form.value, quantity: Number(form.value.quantity) });
+  if (saving.value) return;
+  saving.value = true;
+  const payload = {
+    name: form.value.name,
+    sku: form.value.sku,
+    quantity: Number(form.value.quantity),
+    category: form.value.category,
+    unit: form.value.unit,
+    image_path: imagePath.value,
+  };
+  console.log("Submitting form:", JSON.stringify(payload));
+  emit("save", payload);
+  // saving сбросится при закрытии модалки
 }
 </script>
 
@@ -221,7 +250,8 @@ h2 {
 }
 label {
   display: block;
-  margin-bottom: 16px;
+  margin-bottom: 5px;
+  margin-top: 5px;
   font-size: 14px;
   color: var(--text-secondary);
 }
@@ -259,9 +289,11 @@ input:focus {
   align-items: center;
   justify-content: center;
   transition: background var(--transition);
+  opacity: 1;
 }
 .qty-btn:hover:not(:disabled) {
   background: var(--border);
+  opacity: 1;
 }
 .qty-btn:disabled {
   opacity: 0.4;
@@ -332,9 +364,9 @@ input:focus {
   color: var(--danger);
   background: rgba(239, 83, 80, 0.1);
 }
-.icon-btn:disabled {
+.icon-btn.disabled {
   opacity: 0.4;
-  cursor: default;
+  pointer-events: none;
 }
 .icon {
   width: 16px;
@@ -352,9 +384,5 @@ input:focus {
 }
 button.secondary {
   background: #555;
-}
-.icon-btn.disabled {
-  opacity: 0.4;
-  pointer-events: none;
 }
 </style>

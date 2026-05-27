@@ -21,13 +21,13 @@
       @preview="handlePreview"
     />
 
-    <ProductModal
+    <!-- <ProductModal
       v-if="showModal"
       :product="editingProduct"
       @close="closeModal"
       @save="handleSave"
       @preview="handlePreview"
-    />
+    /> -->
 
     <ImagePreviewModal
       v-if="previewPath"
