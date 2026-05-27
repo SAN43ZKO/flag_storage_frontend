@@ -5,11 +5,11 @@
       <form @submit.prevent="handleSubmit">
         <label>
           Название
-          <input v-model="form.name" required />
+          <input v-model="form.name" />
         </label>
         <label>
           Артикул
-          <input v-model="form.sku" required />
+          <input v-model="form.sku" />
         </label>
         <label>
           Категория
