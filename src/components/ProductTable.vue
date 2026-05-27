@@ -93,6 +93,24 @@ defineEmits(['edit', 'delete', 'add', 'preview'])
 </script>
 
 <style scoped>
+.col-id {
+  width: 5%;
+}
+.col-name {
+  width: 45%;
+}
+.col-sku {
+  width: 10%;
+}
+.col-category {
+  width: 15%;
+}
+.col-unit {
+  width: 5%;
+}
+.col-qty {
+  width: 10%;
+}
 .table-container {
   background: var(--surface);
   border-radius: var(--radius);

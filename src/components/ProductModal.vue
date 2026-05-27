@@ -44,31 +44,42 @@
           </div>
         </label>
 
-        <!-- Секция изображения (только при редактировании) -->
+        <!-- Изображение (только при редактировании) -->
         <div v-if="isEdit" class="image-section">
           <label>Изображение</label>
-          <div class="image-preview" @click="form.image_path && previewImage()">
-            <img
-              v-if="form.image_path"
-              :src="`/products/images/${form.image_path}`"
-              class="preview-img"
-              alt=""
-            />
-            <div v-else class="no-image">—</div>
-          </div>
-          <div class="image-actions">
-            <label class="file-label">
-              Загрузить
-              <input type="file" accept="image/*" @change="onImageSelected" hidden />
-            </label>
-            <button
-              type="button"
-              class="danger"
-              @click="removeImage"
-              :disabled="!form.image_path"
-            >
-              Удалить
-            </button>
+          <div class="image-zone">
+            <div class="preview-wrapper" @click="form.image_path && $emit('preview', form.image_path)">
+              <img
+                v-if="form.image_path"
+                :src="`/products/images/${form.image_path}`"
+                class="preview-img"
+                alt=""
+              />
+              <div v-else class="no-image">—</div>
+            </div>
+            <div class="image-controls">
+              <label class="icon-btn" title="Загрузить">
+                <input type="file" accept="image/*" @change="onImageSelected" hidden />
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </label>
+              <button
+                class="icon-btn danger"
+                title="Удалить"
+                @click="removeImage"
+                :disabled="!form.image_path"
+              >
+                <svg class="icon" viewBox="0 0 24 24">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+              </button>
+            </div>
           </div>
           <p v-if="imageError" class="error">{{ imageError }}</p>
         </div>
@@ -110,9 +121,7 @@ function increment() {
 }
 
 function decrement() {
-  if (form.value.quantity > 0) {
-    form.value.quantity--
-  }
+  if (form.value.quantity > 0) form.value.quantity--
 }
 
 async function onImageSelected(event) {
@@ -141,18 +150,11 @@ async function onImageSelected(event) {
 async function removeImage() {
   if (!form.value.image_path) return
   try {
-    // Обновляем товар, передавая пустой image_path
     await api.update(props.product.id, { ...form.value, image_path: '' })
     form.value.image_path = ''
     imageError.value = ''
   } catch (e) {
     imageError.value = 'Ошибка удаления'
-  }
-}
-
-function previewImage() {
-  if (form.value.image_path) {
-    emit('preview', form.value.image_path)
   }
 }
 
@@ -165,7 +167,7 @@ function handleSubmit() {
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -177,7 +179,7 @@ function handleSubmit() {
   border-radius: var(--radius);
   width: 420px;
   max-width: 90vw;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   transition: background var(--transition);
 }
 h2 {
@@ -189,6 +191,22 @@ label {
   margin-bottom: 16px;
   font-size: 14px;
   color: var(--text-secondary);
+}
+input[type="text"],
+input[type="number"],
+.qty-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  width: 100%;
+  transition: border-color var(--transition);
+}
+input:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 .quantity-field {
   display: flex;
@@ -220,15 +238,76 @@ label {
   width: 80px;
   text-align: center;
   font-size: 16px;
-  padding: 8px;
 }
-.qty-input::-webkit-outer-spin-button,
-.qty-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* Секция изображения */
+.image-section {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
 }
-.qty-input[type=number] {
-  -moz-appearance: textfield;
+.image-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.preview-wrapper {
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--bg);
+}
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.no-image {
+  font-size: 24px;
+  color: var(--text-secondary);
+}
+.image-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.icon-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover:not(:disabled) {
+  background: var(--border);
+  color: var(--text);
+}
+.icon-btn.danger:hover:not(:disabled) {
+  color: var(--danger);
+  background: rgba(239, 83, 80, 0.1);
+}
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.icon {
+  width: 16px;
+  height: 16px;
+}
+.error {
+  color: var(--danger);
+  margin-top: 8px;
 }
 .modal-actions {
   display: flex;
@@ -238,48 +317,5 @@ label {
 }
 button.secondary {
   background: #555;
-}
-.error {
-  color: var(--danger);
-  margin-top: 8px;
-}
-/* Секция изображения */
-.image-section {
-  margin-top: 16px;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
-}
-.image-preview {
-  width: 80px;
-  height: 80px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 8px 0;
-  cursor: pointer;
-}
-.preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.no-image {
-  font-size: 20px;
-  color: var(--text-secondary);
-}
-.image-actions {
-  display: flex;
-  gap: 8px;
-}
-.file-label {
-  background: var(--primary);
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-size: 14px;
 }
 </style>
