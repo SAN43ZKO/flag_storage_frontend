@@ -3,7 +3,7 @@
     <header>
       <div class="nav">
         <router-link to="/" class="nav-link">Главная</router-link>
-        <router-link to="/warehouse" class="nav-link">Складской учёт</router-link>
+        <router-link to="/warehouse" class="nav-link">Склад</router-link>
         <router-link to="/documents" class="nav-link">Документы</router-link>
       </div>
       <button @click="toggleTheme" class="theme-btn" title="Сменить тему">

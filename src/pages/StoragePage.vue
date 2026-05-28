@@ -1,4 +1,5 @@
 <template>
+  <title>Группа Флаг | Склад</title>
   <div>
     <div class="page-header">
       <h1>Складской учёт</h1>
@@ -20,14 +21,6 @@
       @add="openCreateModal"
       @preview="handlePreview"
     />
-
-    <!-- <ProductModal
-      v-if="showModal"
-      :product="editingProduct"
-      @close="closeModal"
-      @save="handleSave"
-      @preview="handlePreview"
-    /> -->
 
     <ImagePreviewModal
       v-if="previewPath"
@@ -125,11 +118,11 @@ function handlePreview(imagePath) {
 
 function onProductUpdate(updatedProduct) {
   // Обновляем объект редактирования
-  editingProduct.value = updatedProduct
+  editingProduct.value = updatedProduct;
   // Сразу обновляем товар в общем списке, чтобы изменения отразились в таблице
-  const idx = products.value.findIndex(p => p.id === updatedProduct.id)
+  const idx = products.value.findIndex((p) => p.id === updatedProduct.id);
   if (idx !== -1) {
-    products.value[idx] = updatedProduct
+    products.value[idx] = updatedProduct;
   }
 }
 
