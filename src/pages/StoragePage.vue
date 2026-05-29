@@ -22,12 +22,6 @@
       @preview="handlePreview"
     />
 
-    <ImagePreviewModal
-      v-if="previewPath"
-      :imagePath="previewPath"
-      @close="previewPath = null"
-    />
-
     <ProductModal
       v-if="showModal"
       :product="editingProduct"
@@ -36,97 +30,118 @@
       @preview="handlePreview"
       @update:product="onProductUpdate"
     />
+
+    <ImagePreviewModal
+      v-if="previewPath"
+      :imagePath="previewPath"
+      @close="previewPath = null"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
-import ProductTable from "../components/ProductTable.vue";
-import ProductModal from "../components/ProductModal.vue";
-import ImagePreviewModal from "../components/ImagePreviewModal.vue";
-import { api } from "../api.js";
+import { ref, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import ProductTable from '../components/ProductTable.vue'
+import ProductModal from '../components/ProductModal.vue'
+import ImagePreviewModal from '../components/ImagePreviewModal.vue'
+import { api } from '../api.js'
 
-const products = ref([]);
-const loading = ref(true);
-const showModal = ref(false);
-const editingProduct = ref(null);
-const searchQuery = ref("");
-const previewPath = ref(null);
+const route = useRoute()
+const router = useRouter()
 
-let debounceTimer;
+const products = ref([])
+const loading = ref(true)
+const showModal = ref(false)
+const editingProduct = ref(null)
+const searchQuery = ref('')
+const previewPath = ref(null)
+
+let debounceTimer
 watch(searchQuery, (newVal) => {
-  clearTimeout(debounceTimer);
+  clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
-    fetchProducts(newVal);
-  }, 300);
-});
+    fetchProducts(newVal)
+  }, 300)
+})
 
-async function fetchProducts(search = "") {
-  loading.value = true;
+async function fetchProducts(search = '') {
+  loading.value = true
   try {
-    products.value = await api.list(search);
+    products.value = await api.list(search)
+    // Если был запрошен edit через query-параметр, пытаемся открыть
+    if (route.query.edit) {
+      const id = Number(route.query.edit)
+      if (!isNaN(id)) {
+        const target = products.value.find(p => p.id === id)
+        if (target) {
+          editingProduct.value = { ...target }
+          showModal.value = true
+        }
+      }
+      // Убираем параметр из URL, чтобы при обновлении не срабатывало снова
+      router.replace({ query: {} })
+    }
   } catch (e) {
-    alert("Ошибка загрузки: " + e.message);
-    products.value = [];
+    alert('Ошибка загрузки: ' + e.message)
+    products.value = []
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
 function openCreateModal() {
-  editingProduct.value = null;
-  showModal.value = true;
+  editingProduct.value = null
+  showModal.value = true
 }
 
 function openEditModal(product) {
-  editingProduct.value = { ...product };
-  showModal.value = true;
+  editingProduct.value = { ...product }
+  showModal.value = true
 }
 
 function closeModal() {
-  showModal.value = false;
-  editingProduct.value = null;
+  showModal.value = false
+  editingProduct.value = null
 }
 
 async function handleSave(formData) {
   try {
     if (editingProduct.value?.id) {
-      await api.update(editingProduct.value.id, formData);
+      await api.update(editingProduct.value.id, formData)
     } else {
-      await api.create(formData);
+      await api.create(formData)
     }
-    await fetchProducts(searchQuery.value);
-    closeModal();
+    await fetchProducts(searchQuery.value)
+    closeModal()
   } catch (e) {
-    alert("Ошибка сохранения: " + e.message);
+    alert('Ошибка сохранения: ' + e.message)
   }
 }
 
 async function handleDelete(product) {
-  if (!confirm(`Удалить товар "${product.name}"?`)) return;
+  if (!confirm(`Удалить товар "${product.name}"?`)) return
   try {
-    await api.delete(product.id);
-    await fetchProducts(searchQuery.value);
+    await api.delete(product.id)
+    await fetchProducts(searchQuery.value)
   } catch (e) {
-    alert("Ошибка удаления: " + e.message);
+    alert('Ошибка удаления: ' + e.message)
   }
 }
 
 function handlePreview(imagePath) {
-  previewPath.value = imagePath;
+  previewPath.value = imagePath
 }
 
 function onProductUpdate(updatedProduct) {
-  // Обновляем объект редактирования
-  editingProduct.value = updatedProduct;
-  // Сразу обновляем товар в общем списке, чтобы изменения отразились в таблице
-  const idx = products.value.findIndex((p) => p.id === updatedProduct.id);
+  editingProduct.value = updatedProduct
+  const idx = products.value.findIndex(p => p.id === updatedProduct.id)
   if (idx !== -1) {
-    products.value[idx] = updatedProduct;
+    products.value[idx] = updatedProduct
   }
 }
 
-onMounted(() => fetchProducts());
+onMounted(() => fetchProducts())
 </script>
 
 <style scoped>
@@ -136,10 +151,7 @@ onMounted(() => fetchProducts());
   align-items: center;
   margin-bottom: 24px;
 }
-h1 {
-  font-size: 24px;
-  font-weight: 600;
-}
+h1 { font-size: 24px; font-weight: 600; }
 .search-bar {
   margin-bottom: 16px;
 }

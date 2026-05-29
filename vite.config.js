@@ -5,13 +5,16 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     proxy: {
-      "/products": "http://localhost:8083", // ← замените, если бэкенд на другом порту
-      "/api/documents": {
-        // документы
-        target: "http://localhost:8082",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/documents/, "/api/files"),
-      },
+      "/products": "http://localhost:8085", // ← замените, если бэкенд на другом порту
+      "/api/stats": "http://localhost:8085", // ← замените, если бэкенд на другом порту
+      "/api/categories": "http://localhost:8085", // ← замените, если бэкенд на другом порту
+      "/api/products/low-stock": "http://localhost:8085", // ← замените, если бэкенд на другом порту
+      // "/api/documents": {
+      //   // документы
+      //   target: "http://localhost:8086",
+      //   changeOrigin: true,
+      //   rewrite: (path) => path.replace(/^\/api\/documents/, "/api/files"),
+      // },
     },
   },
 });
