@@ -245,7 +245,7 @@ function editFile(file) {
     // WOPISrc по HTTP, доступный внутри Docker-сети
     const wopiSrc = encodeURIComponent(`http://frontend/wopi/files/${file.id}`)
     // Редактор открывается по HTTPS
-    const editorUrl = `https://localhost:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}&lang=ru`
+    const editorUrl = `https://sklad.office:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}&lang=ru`
     window.open(editorUrl, '_blank')
 }
 
