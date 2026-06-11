@@ -8,9 +8,15 @@
         <label> Артикул </label>
         <input v-model="form.sku" />
         <label> Категория </label>
-        <input v-model="form.category" />
+        <input v-model="form.category" list="category-list" autocomplete="on"/>
+        <datalist id="category-list">
+          <option v-for="cat in categoriesList" :key="cat" :value="cat" />
+        </datalist>
         <label> Ед. изм. </label>
-        <input v-model="form.unit" />
+        <input v-model="form.unit" list="unit-list" autocomplete="on"/>
+        <datalist id="unit-list">
+          <option v-for="u in unitsList" :key="u" :value="u" />
+        </datalist>
         <label> Количество</label>
         <div class="quantity-field">
           <button
@@ -110,7 +116,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { api } from "../api.js";
 
 const props = defineProps({
@@ -135,6 +141,8 @@ const form = ref({
 const imageError = ref("");
 const uploading = ref(false);
 const saving = ref(false);
+const categoriesList = ref([]);
+const unitsList = ref([]);
 
 // При изменении пропса (например, после обновления родителем) актуализируем imagePath
 watch(
@@ -220,6 +228,20 @@ function handleSubmit() {
   emit("save", payload);
   // saving сбросится при закрытии модалки
 }
+
+onMounted(async () => {
+  // загружаем списки при открытии модалки
+  try {
+    const [cats, uns] = await Promise.all([
+      fetch('/api/categories').then(r => r.json()),
+      fetch('/api/units').then(r => r.json()),
+    ])
+    categoriesList.value = cats || []
+    unitsList.value = uns || []
+  } catch (e) {
+    console.error('Ошибка загрузки справочников', e)
+  }
+})
 </script>
 
 <style scoped>
