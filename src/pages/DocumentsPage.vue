@@ -19,17 +19,8 @@
 
         <div v-else-if="!files || files.length === 0" class="empty-state">
           <div class="empty-icon">
-            <svg
-              class="icon"
-              viewBox="0 0 24 24"
-              width="48"
-              height="48"
-              stroke="currentColor"
-              fill="none"
-            >
-              <path
-                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-              />
+            <svg class="icon" viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" fill="none">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
               <line x1="16" y1="13" x2="8" y2="13" />
               <line x1="16" y1="17" x2="8" y2="17" />
@@ -75,27 +66,10 @@
                   <button
                     @click="previewFile(file)"
                     :disabled="previewLoading[file.id]"
-                    :title="
-                      previewLoading[file.id]
-                        ? 'Идёт подготовка...'
-                        : 'Предпросмотр'
-                    "
+                    :title="previewLoading[file.id] ? 'Идёт подготовка...' : 'Предпросмотр'"
                   >
-                    <svg
-                      v-if="previewLoading[file.id]"
-                      class="icon spinner"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        stroke-width="4"
-                        fill="none"
-                        stroke-dasharray="31.4 31.4"
-                        stroke-linecap="round"
-                      />
+                    <svg v-if="previewLoading[file.id]" class="icon spinner" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round" />
                     </svg>
                     <svg v-else class="icon" viewBox="0 0 24 24">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -104,21 +78,13 @@
                   </button>
                   <button @click="editFile(file)" title="Редактировать">
                     <svg class="icon" viewBox="0 0 24 24">
-                      <path
-                        d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
-                      />
+                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
                     </svg>
                   </button>
-                  <button
-                    class="danger"
-                    @click="deleteFile(file)"
-                    title="Удалить"
-                  >
+                  <button class="danger" @click="deleteFile(file)" title="Удалить">
                     <svg class="icon" viewBox="0 0 24 24">
                       <polyline points="3 6 5 6 21 6" />
-                      <path
-                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                      />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                       <line x1="10" y1="11" x2="10" y2="17" />
                       <line x1="14" y1="11" x2="14" y2="17" />
                     </svg>
@@ -132,13 +98,9 @@
     </div>
 
     <!-- Модальное окно загрузки -->
-    <div
-      v-if="showUploadModal"
-      class="modal-overlay"
-      @click.self="closeUploadModal"
-    >
+    <div v-if="showUploadModal" class="modal-overlay" @click.self="closeUploadModal">
       <div class="modal modal-square">
-        <h2>Загрузить документ</h2>
+        <h2>Загрузить документы</h2>
         <form @submit.prevent="handleUpload">
           <label
             class="file-drop-area"
@@ -153,36 +115,33 @@
               accept=".doc,.docx"
               @change="onFileSelected"
               hidden
+              multiple
             />
-            <div v-if="!selectedFileName" class="drop-content">
-              <svg
-                class="icon icon-large"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                fill="none"
-              >
+            <div v-if="selectedFiles.length === 0" class="drop-content">
+              <svg class="icon icon-large" viewBox="0 0 24 24" stroke="currentColor" fill="none">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <p>Перетащите файл сюда или выберите</p>
+              <p>Перетащите файлы сюда или выберите</p>
             </div>
-            <div v-else class="file-selected">
-              <span>{{ selectedFileName }}</span>
-              <button
-                type="button"
-                @click.stop="clearSelectedFile"
-                class="clear-file"
-              >
-                &times;
-              </button>
+            <div v-else class="file-list">
+              <div v-for="(file, index) in selectedFiles" :key="index" class="file-item">
+                <span>{{ file.name }}</span>
+                <button type="button" @click.stop="removeFile(index)" class="clear-file">&times;</button>
+              </div>
             </div>
           </label>
+          <p v-if="selectedFiles.length > 0" class="file-count">
+            Выбрано файлов: {{ selectedFiles.length }}
+          </p>
+          <div v-if="uploadProgress.total > 0" class="progress-bar">
+            <div class="progress-fill" :style="{ width: uploadProgress.percent + '%' }"></div>
+            <span class="progress-text">{{ uploadProgress.current }} / {{ uploadProgress.total }}</span>
+          </div>
           <div class="modal-actions">
-            <button type="button" @click="closeUploadModal" class="secondary">
-              Отмена
-            </button>
-            <button type="submit" :disabled="!selectedFile">Загрузить</button>
+            <button type="button" @click="closeUploadModal" class="secondary" :disabled="uploading">Отмена</button>
+            <button type="submit" :disabled="selectedFiles.length === 0 || uploading">Загрузить</button>
           </div>
         </form>
         <p v-if="uploadError" class="error">{{ uploadError }}</p>
@@ -190,23 +149,12 @@
     </div>
 
     <!-- Модальное окно подтверждения удаления -->
-    <div
-      v-if="showDeleteModal"
-      class="modal-overlay"
-      @click.self="closeDeleteModal"
-    >
+    <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
       <div class="modal modal-square">
         <div class="modal-icon">
-          <svg
-            class="icon icon-large"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            fill="none"
-          >
+          <svg class="icon icon-large" viewBox="0 0 24 24" stroke="currentColor" fill="none">
             <polyline points="3 6 5 6 21 6" />
-            <path
-              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-            />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             <line x1="10" y1="11" x2="10" y2="17" />
             <line x1="14" y1="11" x2="14" y2="17" />
           </svg>
@@ -231,22 +179,29 @@ const files = ref([]);
 const loading = ref(true);
 const showUploadModal = ref(false);
 const fileInput = ref(null);
-const uploadError = ref("");
+const selectedFiles = ref([]);
+const dragOver = ref(false);
+const uploading = ref(false);
+const uploadProgress = ref({ current: 0, total: 0, percent: 0 });
+const uploadError = ref('');
 const previewLoading = ref({});
 const showDeleteModal = ref(false);
 const deleteTarget = ref(null);
-const selectedFileName = ref("");
-const selectedFile = ref(null);
-const dragOver = ref(false);
-
 const searchQuery = ref("");
 
+// открыть модалку загрузки
+function openUploadModal() {
+  showUploadModal.value = true;
+  uploadError.value = '';
+  selectedFiles.value = [];
+  uploadProgress.value = { current: 0, total: 0, percent: 0 };
+  uploading.value = false;
+}
+
 function editFile(file) {
-    // WOPISrc по HTTP, доступный внутри Docker-сети
-    const wopiSrc = encodeURIComponent(`http://frontend/wopi/files/${file.id}`)
-    // Редактор открывается по HTTPS
-    const editorUrl = `https://sklad.office:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}&lang=ru`
-    window.open(editorUrl, '_blank')
+  const wopiSrc = encodeURIComponent(`http://frontend/wopi/files/${file.id}`);
+  const editorUrl = `https://sklad.office:9980/browser/dist/cool.html?WOPISrc=${wopiSrc}&lang=ru`;
+  window.open(editorUrl, "_blank");
 }
 
 let debounceTimer;
@@ -320,47 +275,11 @@ async function confirmDelete() {
   }
 }
 
-function openUploadModal() {
-  showUploadModal.value = true;
-  uploadError.value = "";
-}
-
 function onFileSelected(event) {
-  const file = event.target.files?.[0];
-  if (file) {
-    selectedFile.value = file;
-    selectedFileName.value = file.name;
-    uploadError.value = "";
-  } else {
-    selectedFile.value = null;
-    selectedFileName.value = "";
-  }
-}
-
-function clearSelectedFile() {
-  selectedFile.value = null;
-  selectedFileName.value = "";
-  if (fileInput.value) fileInput.value.value = "";
-}
-
-function closeUploadModal() {
-  showUploadModal.value = false;
-  clearSelectedFile();
-}
-
-async function handleUpload() {
-  if (!selectedFile.value) {
-    uploadError.value = "Файл не выбран";
-    return;
-  }
-  const formData = new FormData();
-  formData.append("file", selectedFile.value, selectedFile.value.name);
-  try {
-    await documentsApi.upload(formData);
-    await fetchFiles(searchQuery.value);
-    closeUploadModal();
-  } catch (e) {
-    uploadError.value = e.message;
+  const files = event.target.files;
+  if (files && files.length > 0) {
+    addFiles(files);
+    event.target.value = '';
   }
 }
 
@@ -374,23 +293,77 @@ function onDragLeave() {
 
 function onDrop(e) {
   dragOver.value = false;
-  const file = e.dataTransfer?.files?.[0];
-  if (!file) return;
-  if (!file.name.endsWith(".doc") && !file.name.endsWith(".docx")) {
-    uploadError.value = "Поддерживаются только .doc и .docx";
-    selectedFile.value = null;
-    selectedFileName.value = "";
-    return;
+  const files = e.dataTransfer?.files;
+  if (files && files.length > 0) {
+    addFiles(files);
   }
-  const newFile = new File([file], file.name, {
-    type: file.type,
-    lastModified: file.lastModified,
-  });
-  selectedFile.value = newFile;
-  selectedFileName.value = newFile.name;
-  uploadError.value = "";
-  if (fileInput.value) {
-    fileInput.value.value = "";
+}
+
+function addFiles(fileList) {
+  for (const file of fileList) {
+    if (file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+      if (!selectedFiles.value.some(f => f.name === file.name)) {
+        selectedFiles.value.push({ name: file.name, file });
+      }
+    }
+  }
+  if (selectedFiles.value.length === 0 && fileList.length > 0) {
+    uploadError.value = 'Поддерживаются только .doc и .docx';
+  } else {
+    uploadError.value = '';
+  }
+}
+
+function removeFile(index) {
+  selectedFiles.value.splice(index, 1);
+  uploadError.value = '';
+}
+
+function clearSelectedFiles() {
+  selectedFiles.value = [];
+  uploadError.value = '';
+  if (fileInput.value) fileInput.value.value = '';
+}
+
+function closeUploadModal() {
+  showUploadModal.value = false;
+  clearSelectedFiles();
+  uploading.value = false;
+  uploadProgress.value = { current: 0, total: 0, percent: 0 };
+}
+
+async function handleUpload() {
+  if (selectedFiles.value.length === 0) return;
+  uploading.value = true;
+  uploadError.value = '';
+  const total = selectedFiles.value.length;
+  uploadProgress.value = { current: 0, total, percent: 0 };
+
+  let successCount = 0;
+  for (let i = 0; i < selectedFiles.value.length; i++) {
+    const item = selectedFiles.value[i];
+    const formData = new FormData();
+    formData.append('file', item.file);
+
+    try {
+      await documentsApi.upload(formData);
+      successCount++;
+    } catch (e) {
+      uploadError.value = `Ошибка при загрузке "${item.name}": ${e.message}`;
+    }
+    uploadProgress.value = {
+      current: i + 1,
+      total,
+      percent: Math.round(((i + 1) / total) * 100)
+    };
+  }
+
+  await fetchFiles(searchQuery.value);
+  if (successCount === total) {
+    closeUploadModal();
+  } else {
+    uploading.value = false;
+    selectedFiles.value = selectedFiles.value.filter((_, idx) => idx >= successCount);
   }
 }
 
@@ -612,6 +585,56 @@ col.col-actions {
 }
 .clear-file:hover {
   color: var(--danger);
+}
+
+/* Список выбранных файлов */
+.file-list {
+  max-height: 150px;
+  overflow-y: auto;
+  text-align: left;
+  width: 100%;
+}
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.file-item:last-child {
+  border-bottom: none;
+}
+.file-count {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+/* Прогресс-бар */
+.progress-bar {
+  height: 20px;
+  background: var(--border);
+  border-radius: 10px;
+  margin: 8px 0 16px;
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s;
+  border-radius: 10px;
+}
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
 }
 
 .modal-actions {
