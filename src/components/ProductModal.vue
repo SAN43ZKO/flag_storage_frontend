@@ -8,12 +8,12 @@
         <label> Артикул </label>
         <input v-model="form.sku" />
         <label> Категория </label>
-        <input v-model="form.category" list="category-list" autocomplete="on"/>
+        <input v-model="form.category" list="category-list" autocomplete="on" />
         <datalist id="category-list">
           <option v-for="cat in categoriesList" :key="cat" :value="cat" />
         </datalist>
         <label> Ед. изм. </label>
-        <input v-model="form.unit" list="unit-list" autocomplete="on"/>
+        <input v-model="form.unit" list="unit-list" autocomplete="on" />
         <datalist id="unit-list">
           <option v-for="u in unitsList" :key="u" :value="u" />
         </datalist>
@@ -101,6 +101,11 @@
           </div>
           <p v-if="imageError" class="error">{{ imageError }}</p>
         </div>
+        <div v-if="isEdit" class="delete-section">
+          <button type="button" class="danger" @click="confirmDelete">
+            Удалить товар
+          </button>
+        </div>
 
         <div class="modal-actions">
           <button type="button" @click="$emit('close')" class="secondary">
@@ -123,7 +128,13 @@ const props = defineProps({
   product: { type: Object, default: null },
 });
 
-const emit = defineEmits(["close", "save", "preview", "update:product"]);
+const emit = defineEmits(['close', 'save', 'preview', 'update:product', 'delete'])
+
+function confirmDelete() {
+  if (confirm('Вы уверены, что хотите удалить этот товар?')) {
+    emit('delete', props.product)
+  }
+}
 
 const isEdit = computed(() => !!props.product?.id);
 
@@ -233,15 +244,15 @@ onMounted(async () => {
   // загружаем списки при открытии модалки
   try {
     const [cats, uns] = await Promise.all([
-      fetch('/api/categories').then(r => r.json()),
-      fetch('/api/units').then(r => r.json()),
-    ])
-    categoriesList.value = cats || []
-    unitsList.value = uns || []
+      fetch("/api/categories").then((r) => r.json()),
+      fetch("/api/units").then((r) => r.json()),
+    ]);
+    categoriesList.value = cats || [];
+    unitsList.value = uns || [];
   } catch (e) {
-    console.error('Ошибка загрузки справочников', e)
+    console.error("Ошибка загрузки справочников", e);
   }
-})
+});
 </script>
 
 <style scoped>
@@ -406,5 +417,34 @@ input:focus {
 }
 button.secondary {
   background: #555;
+}
+
+.delete-section {
+  margin-top: 20px;
+  text-align: center;
+}
+.delete-section button {
+  background: var(--danger);
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  cursor: pointer;
+}
+.delete-section button:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay .modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    overflow-y: auto;
+    padding: 24px 16px;
+  }
 }
 </style>

@@ -667,4 +667,16 @@ button.secondary {
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 768px) {
+  .modal-overlay .modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    overflow-y: auto;
+    padding: 24px 16px;
+  }
+}
 </style>

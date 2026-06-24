@@ -1,4 +1,5 @@
 <template>
+    <title>Группа Флаг | Склад</title>
   <div>
     <div class="page-header">
       <h1>Складской учёт</h1>
@@ -28,6 +29,7 @@
       @save="handleSave"
       @preview="handlePreview"
       @update:product="onProductUpdate"
+      @delete="onDeleteRequest"
     />
 
     <ImagePreviewModal
