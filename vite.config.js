@@ -7,7 +7,9 @@ export default defineConfig({
     host:'0.0.0.0',
     prot: 5173,
     proxy: {
-      "/products": "http://localhost:8085", // ← замените, если бэкенд на другом порту
+      "/products": "http://localhost:8085",
+      "/products/receipt": "http://localhost:8085",//← замените, если бэкенд на другом порту
+      '/products/autocomplete': 'http://localhost:8085',
       "/api/stats": "http://localhost:8085", // ← замените, если бэкенд на другом порту
       "/api/units": "http://localhost:8085", // ← замените, если бэкенд на другом порту
       "/api/categories": "http://localhost:8085", // ← замените, если бэкенд на другом порту

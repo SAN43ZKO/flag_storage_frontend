@@ -101,7 +101,7 @@
           </div>
           <p v-if="imageError" class="error">{{ imageError }}</p>
         </div>
-        <div v-if="isEdit" class="delete-section">
+        <div v-if="isEdit" class="delete-section mobile-only">
           <button type="button" class="danger" @click="confirmDelete">
             Удалить товар
           </button>
@@ -435,6 +435,9 @@ button.secondary {
 .delete-section button:hover {
   opacity: 0.8;
 }
+  .mobile-only {
+    display: none;   /* показывается только на мобильных */
+  }
 
 @media (max-width: 768px) {
   .modal-overlay .modal {
@@ -445,6 +448,9 @@ button.secondary {
     border-radius: 0;
     overflow-y: auto;
     padding: 24px 16px;
+  }
+    .mobile-only {
+    display: block;   /* показывается только на мобильных */
   }
 }
 </style>
