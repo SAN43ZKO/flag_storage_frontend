@@ -1,5 +1,5 @@
 // v4 — гарантированно новая версия кэша
-const CACHE = 'storage-v6';
+const CACHE = 'storage-v7';
 
 // Список файлов для предварительного кэширования (без хэшей)
 const PRECACHE = [
