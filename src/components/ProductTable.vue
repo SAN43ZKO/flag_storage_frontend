@@ -30,6 +30,7 @@
           <col class="col-category" />
           <col class="col-unit" />
           <col class="col-qty" />
+          <col class="col-reserved" />
           <col class="col-actions" />
         </colgroup>
         <thead>
@@ -40,6 +41,7 @@
             <th>Категория</th>
             <th>Ед.</th>
             <th>Количество</th>
+            <th>Резерв</th>
             <th>Действия</th>
           </tr>
         </thead>
@@ -70,6 +72,7 @@
             <td>{{ product.category ?? "—" }}</td>
             <td>{{ product.unit ?? "—" }}</td>
             <td>{{ product.quantity }}</td>
+            <td>{{ product.reserved || 0 }}</td>
             <td class="cell-actions">
               <div class="actions">
                 <button @click="$emit('edit', product)" title="Редактировать">
@@ -122,6 +125,7 @@
               {{ product.sku || "—" }} · {{ product.category || "—" }}
             </div>
             <div class="card-qty">Количество: {{ product.quantity }}</div>
+            <div class="card-reserved">Резерв: {{ product.reserved || 0 }}</div>
           </div>
         </div>
       </div>
@@ -143,19 +147,22 @@ defineEmits(["edit", "delete", "add", "preview"]);
   width: 5%;
 }
 .col-name {
-  width: 45%;
+  width: 40%;
 }
 .col-sku {
-  width: 10%;
+  width: 5%;
 }
 .col-category {
-  width: 15%;
+  width: 10%;
 }
 .col-unit {
   width: 5%;
 }
 .col-qty {
-  width: 10%;
+  width: 7%;
+}
+.col-reserved {
+  width: 7%;
 }
 .table-container {
   background: var(--surface);
@@ -165,9 +172,9 @@ defineEmits(["edit", "delete", "add", "preview"]);
 }
 .table-content {
   min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  /* align-items: center; */
+  /* justify-content: center; */
 }
 .loading {
   padding: 40px;
@@ -193,7 +200,7 @@ defineEmits(["edit", "delete", "add", "preview"]);
   margin-top: 8px;
 }
 table {
-  width: 100%;
+  width: auto; /* 100% */
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -356,6 +363,11 @@ td {
   }
 
   .card-qty {
+    font-size: 14px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .card-reserved {
     font-size: 14px;
     margin-top: 4px;
     font-weight: 500;

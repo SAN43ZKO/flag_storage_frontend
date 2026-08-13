@@ -22,7 +22,7 @@
           <button
             type="button"
             class="qty-btn"
-            @click="decrement"
+            @click="decrement_qty"
             :disabled="form.quantity <= 0"
           >
             <svg class="icon" viewBox="0 0 24 24">
@@ -37,7 +37,34 @@
             required
             class="qty-input"
           />
-          <button type="button" class="qty-btn" @click="increment">
+          <button type="button" class="qty-btn" @click="increment_qty">
+            <svg class="icon" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        </div>
+        <label> Резерв</label>
+        <div class="quantity-field">
+          <button
+            type="button"
+            class="qty-btn"
+            @click="decrement_rsv"
+            :disabled="form.reserved <= 0"
+          >
+            <svg class="icon" viewBox="0 0 24 24">
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <input
+            v-model.number="form.reserved"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            required
+            class="qty-input"
+          />
+          <button type="button" class="qty-btn" @click="increment_rsv">
             <svg class="icon" viewBox="0 0 24 24">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -128,11 +155,17 @@ const props = defineProps({
   product: { type: Object, default: null },
 });
 
-const emit = defineEmits(['close', 'save', 'preview', 'update:product', 'delete'])
+const emit = defineEmits([
+  "close",
+  "save",
+  "preview",
+  "update:product",
+  "delete",
+]);
 
 function confirmDelete() {
-  if (confirm('Вы уверены, что хотите удалить этот товар?')) {
-    emit('delete', props.product)
+  if (confirm("Вы уверены, что хотите удалить этот товар?")) {
+    emit("delete", props.product);
   }
 }
 
@@ -147,6 +180,7 @@ const form = ref({
   quantity: props.product?.quantity || 0,
   category: props.product?.category || "",
   unit: props.product?.unit || "",
+  reserved: props.product?.reserved || 0,
 });
 
 const imageError = ref("");
@@ -165,12 +199,20 @@ watch(
   },
 );
 
-function increment() {
+function increment_qty() {
   form.value.quantity++;
 }
 
-function decrement() {
+function decrement_qty() {
   if (form.value.quantity > 0) form.value.quantity--;
+}
+
+function increment_rsv() {
+  form.value.reserved++;
+}
+
+function decrement_rsv() {
+  if (form.value.reserved > 0) form.value.reserved--;
 }
 
 async function onImageSelected(event) {
@@ -233,6 +275,7 @@ function handleSubmit() {
     quantity: Number(form.value.quantity),
     category: form.value.category,
     unit: form.value.unit,
+    reserved: Number(form.value.reserved) || 0,
     image_path: imagePath.value,
   };
   console.log("Submitting form:", JSON.stringify(payload));
@@ -435,9 +478,9 @@ button.secondary {
 .delete-section button:hover {
   opacity: 0.8;
 }
-  .mobile-only {
-    display: none;   /* показывается только на мобильных */
-  }
+.mobile-only {
+  display: none; /* показывается только на мобильных */
+}
 
 @media (max-width: 768px) {
   .modal-overlay .modal {
@@ -449,8 +492,8 @@ button.secondary {
     overflow-y: auto;
     padding: 24px 16px;
   }
-    .mobile-only {
-    display: block;   /* показывается только на мобильных */
+  .mobile-only {
+    display: block; /* показывается только на мобильных */
   }
 }
 </style>

@@ -56,7 +56,7 @@ applyTheme()
 
 <style scoped>
 .app {
-  max-width: 960px;
+  max-width: 1000px;
   margin: 0 auto;
   min-height: 100vh;
 }
