@@ -1,28 +1,48 @@
-/* === Базовые переменные (тёмная тема по умолчанию) === */
+/* === Глобальные стили === */
 :root {
-  --bg: #1a1a1a;
-  --surface: #2a2a2a;
-  --text: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --primary: #4fc3f7;
-  --danger: #ef5350;
-  --border: #404040;
-  --radius: 6px;
-  --transition: 0.2s;
-}
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-/* === Светлая тема === */
-body.light-theme {
-  --bg: #f5f5f5;
+  --bg: #f5f7fb;
   --surface: #ffffff;
-  --text: #222222;
-  --text-secondary: #666666;
-  --primary: #1976d2;
-  --danger: #d32f2f;
-  --border: #cccccc;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --border: #e2e8f0;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 24px rgba(0,0,0,0.1);
+  --transition: 0.2s ease;
 }
 
-/* === Сброс и общие стили === */
+body.light-theme {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --border: #e2e8f0;
+}
+
+body.dark-theme {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --primary: #60a5fa;
+  --primary-hover: #3b82f6;
+  --danger: #f87171;
+  --danger-hover: #ef4444;
+  --border: #334155;
+}
+
 *,
 *::before,
 *::after {
@@ -31,8 +51,13 @@ body.light-theme {
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-family);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -44,46 +69,74 @@ button {
   cursor: pointer;
   border: none;
   border-radius: var(--radius);
-  padding: 8px 16px;
+  padding: 10px 18px;
   font-size: 14px;
+  font-weight: 500;
   color: #fff;
   background: var(--primary);
-  transition: background var(--transition), opacity var(--transition);
+  transition: background var(--transition), box-shadow var(--transition), transform 0.1s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 button:hover {
-  opacity: 0.85;
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-md);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+button.secondary:hover {
+  background: var(--border);
+  color: var(--text);
 }
 
 button.danger {
   background: var(--danger);
 }
 
-button.secondary {
-  background: #555;
+button.danger:hover {
+  background: var(--danger-hover);
 }
 
-input {
+input,
+select,
+textarea {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius);
   font-size: 14px;
   width: 100%;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-input:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-/* Иконки по умолчанию наследуют цвет текста */
 .icon {
   width: 18px;
   height: 18px;
@@ -95,35 +148,239 @@ input:focus {
   flex-shrink: 0;
 }
 
-/* --- Мобильная адаптация --- */
+/* Общие контейнеры */
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.search-bar {
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  padding: 12px 16px;
+  font-size: 15px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Таблицы */
+.table-container {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: background var(--transition);
+}
+
+.table-content {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  opacity: 0.6;
+}
+
+.empty-state p {
+  font-size: 16px;
+  margin: 0;
+}
+
+.empty-state button {
+  margin-top: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+td {
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  background: transparent;
+  padding: 8px;
+  color: var(--text-secondary);
+  border-radius: 8px;
+}
+
+.actions button:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.actions button.danger:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Модальные окна */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  min-width: 360px;
+  box-shadow: var(--shadow-lg);
+  animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-square {
+  padding: 32px;
+  text-align: center;
+  min-width: 360px;
+  max-width: 400px;
+}
+
+.modal-square h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.modal-icon {
+  margin-bottom: 16px;
+  color: var(--danger);
+}
+
+.icon-large {
+  width: 48px;
+  height: 48px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Полноэкранная модалка (приёмка) */
+.modal-full {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: calc(100% - 48px);
+  height: calc(100% - 48px);
+  max-width: 1000px;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalFadeIn 0.25s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+/* Карточки для мобильных */
+.card-list {
+  display: none;
+}
+
 @media (max-width: 768px) {
   body {
-    padding: 10px;
+    padding: 12px;
   }
 
-  /* Кнопки крупнее для пальцев */
-  button {
-    padding: 10px 14px;
-    font-size: 15px;
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  /* Инпуты повыше */
-  input {
-    padding: 10px 12px;
-    font-size: 16px;  /* предотвращает масштабирование на iOS */
-  }
-
-  /* Таблицы скрываем, вместо них будем показывать карточки */
-  .table-container table {
-    display: none;
-  }
-  .table-container .card-list {
-    display: grid;
-    gap: 12px;
-  }
-
-  /* Модальные окна на полный экран */
-  .modal-overlay .modal {
+  .modal {
     width: 100%;
     max-width: 100%;
     height: 100%;
@@ -132,23 +389,21 @@ input:focus {
     overflow-y: auto;
   }
 
-  /* Шапка страницы в колонку */
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .modal-full {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .card-list {
+    display: grid;
     gap: 12px;
+    padding: 12px;
   }
 
-  /* Быстрые действия на главной */
-  .quick-actions {
-    flex-direction: column;
-  }
-}
-
-/* Убираем масштабирование полей ввода на iOS */
-@media screen and (-webkit-min-device-pixel-ratio: 2) {
-  input[type="text"],
-  input[type="number"] {
-    font-size: 16px !important;
+  table {
+    display: none;
   }
 }

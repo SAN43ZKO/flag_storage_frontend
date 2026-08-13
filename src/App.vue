@@ -36,7 +36,9 @@ const isDark = ref(true)
 function applyTheme() {
   if (isDark.value) {
     document.body.classList.remove('light-theme')
+    document.body.classList.add('dark-theme')
   } else {
+    document.body.classList.remove('dark-theme')
     document.body.classList.add('light-theme')
   }
 }
@@ -55,17 +57,11 @@ applyTheme()
 </script>
 
 <style scoped>
-.app {
-  max-width: 1000px;
-  margin: 0 auto;
-  min-height: 100vh;
-}
-
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--border);
   margin-bottom: 24px;
 }
@@ -79,23 +75,25 @@ header {
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 15px;
-  padding: 4px 0;
-  border-bottom: 2px solid transparent;
-  transition: color var(--transition), border-color var(--transition);
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: color var(--transition), background var(--transition);
 }
 
 .nav-link:hover,
 .nav-link.router-link-active {
   color: var(--text);
-  border-bottom-color: var(--primary);
+  background: var(--border);
 }
 
 .theme-btn {
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
-  padding: 6px 12px;
+  padding: 8px 14px;
   font-size: 13px;
+  border-radius: 8px;
 }
 
 .theme-btn:hover {
