@@ -16,9 +16,13 @@ async function request(url, options = {}) {
 }
 
 export const api = {
-  list: (search = "") => {
-    const params = search ? `?search=${encodeURIComponent(search)}` : "";
-    return request(`${BASE}${params}`);
+  list: (search = "", category = "", sort = "") => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (category) params.set('category', category);
+    if (sort) params.set('sort', sort);
+    const qs = params.toString();
+    return request(`${BASE}${qs ? '?' + qs : ''}`);
   },
   get: (id) => request(`${BASE}/${id}`),
   create: (data) =>

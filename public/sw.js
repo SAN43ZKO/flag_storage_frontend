@@ -1,4 +1,4 @@
-const CACHE = 'storage-v8';
+const CACHE = 'storage-v8.1';
 
 const PRECACHE = [
   '/',
@@ -56,7 +56,7 @@ async function networkFirst(request) {
   try {
     const response = await fetch(request);
     // Кэшируем только успешные ответы
-    if (response.ok) {
+    if (response.ok && isCacheableURL(request.url)) {
       cache.put(request, response.clone());
     }
     return response;
@@ -67,5 +67,16 @@ async function networkFirst(request) {
       status: 503,
       headers: { 'Content-Type': 'application/json' }
     });
+  }
+}
+
+// Не кэшируем запросы с поисковыми параметрами (?q= и т.п.),
+// чтобы кэш не разрастался от уникальных запросов поиска
+function isCacheableURL(url) {
+  try {
+    const u = new URL(url);
+    return u.search === '' || !u.searchParams.has('q');
+  } catch (e) {
+    return true;
   }
 }

@@ -1,5 +1,4 @@
 <template>
-  <title>Группа Флаг | Склад</title>
   <div>
     <div class="page-header">
       <h1>Складской учёт</h1>
@@ -17,6 +16,41 @@
         placeholder="Поиск по названию или артикулу"
       />
     </div>
+    <div class="filters-row">
+      <button
+        @click="toggleFilters"
+        class="filter-toggle"
+        :class="{ active: showFilters }"
+      >
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+        </svg>
+        <span class="filter-label">Фильтр</span>
+      </button>
+
+      <transition name="fade">
+        <div v-if="showFilters" class="filters">
+          <select v-model="filterCategory" @change="applyFilters">
+            <option value="">Все категории</option>
+            <option v-for="cat in categoriesList" :key="cat" :value="cat">
+              {{ cat }}
+            </option>
+          </select>
+          <select v-model="sortQuantity" @change="applyFilters">
+            <option value="">Сортировка по количеству: нет</option>
+            <option value="asc">Сначала меньше</option>
+            <option value="desc">Сначала больше</option>
+          </select>
+        </div>
+      </transition>
+    </div>
+
+    <div v-if="loadError" class="error-banner">
+      <span>{{ loadError }}</span>
+      <button @click="fetchProducts(searchQuery.value, filterCategory.value, sortQuantity.value)">
+        Повторить
+      </button>
+    </div>
 
     <ProductTable
       :products="products"
@@ -30,6 +64,7 @@
     <ProductModal
       v-if="showModal"
       :product="editingProduct"
+      :saving="saving"
       @close="closeModal"
       @save="handleSave"
       @preview="handlePreview"
@@ -250,6 +285,10 @@ const products = ref([]);
 const loading = ref(true);
 const showModal = ref(false);
 const editingProduct = ref(null);
+// Истинная блокировка кнопки «Сохранить» во время POST/PUT/PATCH
+const saving = ref(false);
+// Сообщение об ошибке загрузки (мягкое, без alert)
+const loadError = ref("");
 const searchQuery = ref("");
 const previewPath = ref(null);
 
@@ -272,6 +311,11 @@ let autocompleteTimer = null;
 // Справочники (загружаются асинхронно, не блокируя интерфейс)
 const categoriesList = ref([]);
 const unitsList = ref([]);
+
+const filterCategory = ref("");
+const sortQuantity = ref("");
+
+const showFilters = ref(false);
 
 async function fetchAutocomplete(query) {
   if (query.length < 2) {
@@ -352,8 +396,13 @@ watch(searchQuery, (newVal) => {
 
 async function fetchProducts(search = "") {
   loading.value = true;
+  loadError.value = "";
   try {
-    products.value = await api.list(search);
+    products.value = await api.list(
+      searchQuery.value,
+      filterCategory.value,
+      sortQuantity.value,
+    );
     if (route.query.edit) {
       const id = Number(route.query.edit);
       if (!isNaN(id)) {
@@ -366,7 +415,7 @@ async function fetchProducts(search = "") {
       router.replace({ query: {} });
     }
   } catch (e) {
-    alert("Ошибка загрузки: " + e.message);
+    loadError.value = "Ошибка загрузки: " + e.message;
     products.value = [];
   } finally {
     loading.value = false;
@@ -389,16 +438,24 @@ function closeModal() {
 }
 
 async function handleSave(formData) {
+  if (saving.value) return;
+  saving.value = true;
   try {
     if (editingProduct.value?.id) {
       await api.update(editingProduct.value.id, formData);
     } else {
       await api.create(formData);
     }
-    await fetchProducts(searchQuery.value);
+    await fetchProducts(
+      searchQuery.value,
+      filterCategory.value,
+      sortQuantity.value,
+    );
     closeModal();
   } catch (e) {
     alert("Ошибка сохранения: " + e.message);
+  } finally {
+    saving.value = false;
   }
 }
 
@@ -416,7 +473,11 @@ async function confirmDelete() {
   if (!deleteTarget.value) return;
   try {
     await api.delete(deleteTarget.value.id);
-    await fetchProducts(searchQuery.value);
+    await fetchProducts(
+      searchQuery.value,
+      filterCategory.value,
+      sortQuantity.value,
+    );
   } catch (e) {
     alert("Ошибка удаления: " + e.message);
   } finally {
@@ -492,6 +553,7 @@ function removeReceiptItem(idx) {
 }
 
 async function submitReceipt() {
+  if (receiptSending.value) return;
   receiptSending.value = true;
   receiptResult.value = null;
   try {
@@ -508,7 +570,9 @@ async function submitReceipt() {
     });
     const data = await resp.json();
     receiptResult.value = data;
-    if (resp.ok) {
+
+    const ok = resp.ok && !(data && data.errors && data.errors.length > 0);
+    if (ok) {
       receiptItems.value = [];
       await fetchProducts(searchQuery.value);
     }
@@ -532,8 +596,20 @@ async function loadDictionaries() {
   }
 }
 
+function applyFilters() {
+  fetchProducts(searchQuery.value);
+}
+
+function toggleFilters() {
+  showFilters.value = !showFilters.value;
+}
+
 onMounted(async () => {
-  await fetchProducts(); // обязательно дождаться
+  await fetchProducts(
+    searchQuery.value,
+    filterCategory.value,
+    sortQuantity.value,
+  ); // обязательно дождаться
   loadDictionaries(); // запустить асинхронно, без привязки к loading
 });
 </script>
@@ -732,6 +808,94 @@ td input {
 .error {
   color: var(--danger);
 }
+.filters-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  color: var(--danger);
+  font-size: 14px;
+}
+.error-banner button {
+  background: var(--danger);
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.filter-toggle {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.filter-toggle:hover {
+  background: var(--border);
+}
+
+/* Текст внутри кнопки */
+.filter-label {
+  display: inline-block;
+  max-width: 100px;
+  opacity: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.25s ease, opacity 0.2s ease, margin-left 0.25s ease;
+}
+
+/* Когда фильтры открыты – текст уезжает влево и схлопывается */
+.filter-toggle.active .filter-label {
+  max-width: 0;
+  opacity: 0;
+  margin-left: -8px;
+}
+
+/* Иконка не переворачивается */
+.filters {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.filters select {
+  flex: 1;
+}
+
+/* Анимация появления/скрытия панели фильтров */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
 
 /* Адаптация для мобильных */
 /* --- Мобильная адаптация приёмки --- */
@@ -840,6 +1004,14 @@ td input {
     width: 100%;
     padding: 14px;
     font-size: 16px;
+  }
+
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters {
+    flex-direction: column;
   }
 }
 </style>

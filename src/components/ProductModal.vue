@@ -153,6 +153,8 @@ import { api } from "../api.js";
 
 const props = defineProps({
   product: { type: Object, default: null },
+  // Управляется родителем — истинная блокировка во время POST/PUT
+  saving: { type: Boolean, default: false },
 });
 
 const emit = defineEmits([
@@ -185,7 +187,7 @@ const form = ref({
 
 const imageError = ref("");
 const uploading = ref(false);
-const saving = ref(false);
+// saving теперь приходит из родителя (пропс) — локальная переменная не нужна
 const categoriesList = ref([]);
 const unitsList = ref([]);
 
@@ -216,7 +218,7 @@ function decrement_rsv() {
 }
 
 async function onImageSelected(event) {
-  if (uploading.value || saving.value) return;
+  if (uploading.value || props.saving) return;
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -245,8 +247,7 @@ async function onImageSelected(event) {
 
 async function removeImage() {
   if (!imagePath.value) return;
-  if (uploading.value || saving.value) return;
-  saving.value = true;
+  if (uploading.value || props.saving) return;
   try {
     await api.update(props.product.id, {
       name: form.value.name,
@@ -261,14 +262,11 @@ async function removeImage() {
     imageError.value = "";
   } catch (e) {
     imageError.value = "Ошибка удаления";
-  } finally {
-    saving.value = false;
   }
 }
 
 function handleSubmit() {
-  if (saving.value) return;
-  saving.value = true;
+  if (props.saving) return;
   const payload = {
     name: form.value.name,
     sku: form.value.sku,
@@ -278,9 +276,8 @@ function handleSubmit() {
     reserved: Number(form.value.reserved) || 0,
     image_path: imagePath.value,
   };
-  console.log("Submitting form:", JSON.stringify(payload));
   emit("save", payload);
-  // saving сбросится при закрытии модалки
+  // saving управляется родителем (handleSave) и сбрасывается в finally
 }
 
 onMounted(async () => {

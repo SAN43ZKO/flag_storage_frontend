@@ -1,1 +1,4 @@
 node_modules
+dist
+# Devy Agent local data (plan, memory, chat log, cache)
+.devy-agent/

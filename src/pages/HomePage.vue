@@ -1,5 +1,4 @@
 <template>
-  <title>Группа Флаг | Главная</title>
   <div class="home">
     <!-- Сводка -->
     <section class="stats">
@@ -11,10 +10,10 @@
         <div class="stat-value">{{ stats.total_categories ?? "—" }}</div>
         <div class="stat-label">Категорий</div>
       </div>
-      <div class="stat-card warning">
+      <!-- <div class="stat-card warning">
         <div class="stat-value">{{ stats.low_stock_count ?? "—" }}</div>
         <div class="stat-label">Мало на складе</div>
-      </div>
+      </div> -->
       <div class="stat-card">
         <div class="stat-value">{{ docCount ?? "—" }}</div>
         <div class="stat-label">Документов</div>
@@ -23,13 +22,12 @@
 
     <!-- Быстрые действия -->
     <section class="quick-actions">
-      <router-link to="/warehouse" class="action-btn">📦 Склад</router-link>
-      <router-link to="/documents" class="action-btn">📄 Документы</router-link>
+      <router-link to="/history" class="action-btn"> История изменений</router-link>
     </section>
 
     <!-- Таблицы (скрыты при showTables = false) -->
     <!-- Табы и слайдер видны всегда -->
-    <section class="tables-header">
+    <!-- <section class="tables-header">
       <div class="tabs">
         <button
           :class="{ active: activeTab === 'low' }"
@@ -53,7 +51,7 @@
           >{{ showTables ? "Скрыть" : "Показать" }} таблицы</span
         >
       </div>
-    </section>
+    </section> -->
 
     <!-- Содержимое таблиц скрывается/показывается -->
     <section v-show="showTables" class="tables">
@@ -142,7 +140,10 @@ const showTables = ref(false); // по умолчанию таблицы скр�
 async function fetchStats() {
   try {
     const [prodResp, docs] = await Promise.all([
-      fetch("/api/stats").then((r) => r.json()),
+      fetch("/api/stats").then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      }),
       documentsApi.list(),
     ]);
     stats.value = prodResp;
@@ -155,7 +156,9 @@ async function fetchStats() {
 async function fetchLowStock() {
   loadingLowStock.value = true;
   try {
-    const data = await fetch("/api/products/low-stock").then((r) => r.json());
+    const resp = await fetch("/api/products/low-stock");
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
     lowStock.value = Array.isArray(data) ? data : [];
   } catch (e) {
     console.error("Low-stock fetch error", e);

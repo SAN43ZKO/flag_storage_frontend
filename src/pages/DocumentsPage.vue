@@ -1,5 +1,4 @@
 <template>
-  <title>Группа Флаг | Документы</title>
   <div>
     <div class="page-header">
       <h1>Документы</h1>
@@ -340,8 +339,11 @@ async function handleUpload() {
   uploadProgress.value = { current: 0, total, percent: 0 };
 
   let successCount = 0;
-  for (let i = 0; i < selectedFiles.value.length; i++) {
-    const item = selectedFiles.value[i];
+  const failedFiles = [];
+  // Копия списка на момент начала — чтобы можно было оставить для повторной загрузки
+  const items = [...selectedFiles.value];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     const formData = new FormData();
     formData.append('file', item.file);
 
@@ -350,6 +352,7 @@ async function handleUpload() {
       successCount++;
     } catch (e) {
       uploadError.value = `Ошибка при загрузке "${item.name}": ${e.message}`;
+      failedFiles.push(item);
     }
     uploadProgress.value = {
       current: i + 1,
@@ -363,7 +366,8 @@ async function handleUpload() {
     closeUploadModal();
   } else {
     uploading.value = false;
-    selectedFiles.value = selectedFiles.value.filter((_, idx) => idx >= successCount);
+    // Оставляем в списке только то, что не удалось загрузить
+    selectedFiles.value = failedFiles;
   }
 }
 
