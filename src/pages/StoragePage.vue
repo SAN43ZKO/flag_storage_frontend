@@ -47,7 +47,15 @@
 
     <div v-if="loadError" class="error-banner">
       <span>{{ loadError }}</span>
-      <button @click="fetchProducts(searchQuery.value, filterCategory.value, sortQuantity.value)">
+      <button
+        @click="
+          fetchProducts(
+            searchQuery.value,
+            filterCategory.value,
+            sortQuantity.value,
+          )
+        "
+      >
         Повторить
       </button>
     </div>
@@ -246,6 +254,9 @@
           </div>
 
           <div v-if="receiptItems.length > 0" class="submit-row">
+            <button @click="printReceipt" :disabled="receiptSending">
+              🖨 Печать PDF
+            </button>
             <button @click="submitReceipt" :disabled="receiptSending">
               Принять товар
             </button>
@@ -604,6 +615,32 @@ function toggleFilters() {
   showFilters.value = !showFilters.value;
 }
 
+async function printReceipt() {
+  if (receiptItems.value.length === 0) return;
+  try {
+    const resp = await fetch("/products/receipt/pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: receiptItems.value.map((i) => ({
+          sku: i.sku || "",
+          name: i.name || "",
+          quantity: i.quantity,
+          category: i.category || "",
+          unit: i.unit || "",
+        })),
+      }),
+    });
+    if (!resp.ok) throw new Error("Не удалось сформировать PDF");
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
 onMounted(async () => {
   await fetchProducts(
     searchQuery.value,
@@ -791,7 +828,9 @@ td input {
   font-size: 15px;
 }
 .submit-row {
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
   margin-top: 16px;
 }
 .submit-row button {
@@ -863,7 +902,10 @@ td input {
   opacity: 1;
   overflow: hidden;
   white-space: nowrap;
-  transition: max-width 0.25s ease, opacity 0.2s ease, margin-left 0.25s ease;
+  transition:
+    max-width 0.25s ease,
+    opacity 0.2s ease,
+    margin-left 0.25s ease;
 }
 
 /* Когда фильтры открыты – текст уезжает влево и схлопывается */
@@ -889,7 +931,9 @@ td input {
 /* Анимация появления/скрытия панели фильтров */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -1000,10 +1044,11 @@ td input {
     border-radius: var(--radius);
   }
 
+  .submit-row {
+    flex-direction: column;
+  }
   .submit-row button {
     width: 100%;
-    padding: 14px;
-    font-size: 16px;
   }
 
   .filters-row {

@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       "/products": "http://localhost:8085",
       "/products/receipt": "http://localhost:8085",//← замените, если бэкенд на другом порту
+      "/products/receipt/pdf": "http://localhost:8085",//← замените, если бэкенд на другом порту
       "/product-changes": "http://localhost:8085",
       '/products/autocomplete': 'http://localhost:8085',
       "/api/stats": "http://localhost:8085", // ← замените, если бэкенд на другом порту

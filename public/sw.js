@@ -1,4 +1,4 @@
-const CACHE = 'storage-v8.2';
+const CACHE = 'storage-v8.3';
 
 const PRECACHE = [
   '/',
